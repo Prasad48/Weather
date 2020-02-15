@@ -41,11 +41,23 @@ public class MainActivityViewModel extends ViewModel {
                 public void onFailure(Call<WeatherUpdate> call, Throwable t) {
                     String error_message= t.getMessage();
                     Log.d("Error loading data", error_message);
+                    show_networkError.setValue(true);
+                    showProgressBar.setValue(false);
                 }
             });
         }
 
         return weatherUpdateMutableLiveData;
+    }
+
+
+    public LiveData<Boolean> getShowProgressBar() {
+        return showProgressBar;
+    }
+
+
+    public MutableLiveData<Boolean> getShow_networkError() {
+        return show_networkError;
     }
 
     public LiveData<Forecast> getForecastMutableLiveData() {
@@ -64,10 +76,30 @@ public class MainActivityViewModel extends ViewModel {
                 public void onFailure(Call<Forecast> call, Throwable t) {
                     String error_message= t.getMessage();
                     Log.d("Error loading data", error_message);
+                    show_networkError.setValue(true);
+                    showProgressBar.setValue(false);
                 }
             });
 
         }
         return forecastMutableLiveData;
+    }
+
+    public void retry() {
+        apicall.clone().enqueue(new Callback<WeatherUpdate>() {
+            @Override
+            public void onResponse(Call<WeatherUpdate> call, Response<WeatherUpdate> response) {
+                Log.d("success", "onResponse: "+response.raw().toString());
+                weatherUpdateMutableLiveData.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<WeatherUpdate> call, Throwable t) {
+                String error_message= t.getMessage();
+                Log.d("Error loading data", error_message);
+                show_networkError.setValue(true);
+                showProgressBar.setValue(false);
+            }
+        });
     }
 }

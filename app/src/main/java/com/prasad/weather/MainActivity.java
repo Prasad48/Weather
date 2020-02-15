@@ -1,8 +1,13 @@
 package com.prasad.weather;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.graphics.Path;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -14,8 +19,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.prasad.weather.models.Forecast;
@@ -38,12 +47,16 @@ public class MainActivity extends AppCompatActivity {
     ImageView weathertypeimg;
     public static final String IMG_URL = "https://openweathermap.org/img/w/";
     public String iconName;
-
+    Button retry;
     Double temperaturecelsius,mintemperature,maxtemperature;
     public MainActivityViewModel mainActivityViewModel;
     private String TAG = "Main Activity";
     private BottomSheetBehavior sheetBehavior;
     private LinearLayout bottom_sheet;
+    private ProgressBar progressBar;
+    private RelativeLayout layout_nonetwork;
+    public MutableLiveData<Boolean> showProgressBar = new MutableLiveData<>();
+    public MutableLiveData<Boolean> show_networkError = new MutableLiveData<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +74,61 @@ public class MainActivity extends AppCompatActivity {
         bottom_sheet = findViewById(R.id.bottom_sheet);
         sheetBehavior = BottomSheetBehavior.from(bottom_sheet);
         mainActivityViewModel  = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+        layout_nonetwork = findViewById(R.id.no_network);
+
+        if(!isNetworkAvailable()){
+            layout_nonetwork.setVisibility(View.VISIBLE);
+            findViewById(R.id.bottom_sheet).setVisibility(View.INVISIBLE);
+//            findViewById(R.id.mainActivity).setVisibility(View.INVISIBLE);
+        }
+        else {
+            layout_nonetwork.setVisibility(View.GONE);
+            findViewById(R.id.bottom_sheet).setVisibility(View.VISIBLE);
+            findViewById(R.id.mainActivity).setBackgroundResource(R.drawable.background);
+        }
+        progressBar = findViewById(R.id.progress_bar);
+        retry=findViewById(R.id.retry);
+
+        retry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                mainActivityViewModel.retry();
+//                System.out.println("retry clicked");
+//                mainActivityViewModel.getWeatherUpdateMutableLiveData().observe(MainActivity.this, new Observer<WeatherUpdate>() {
+//                    @Override
+//                    public void onChanged(@Nullable WeatherUpdate weatherUpdate) {
+//                        layout_nonetwork.setVisibility(View.GONE);
+//                        findViewById(R.id.mainActivity).setVisibility(View.VISIBLE);
+//                        findViewById(R.id.mainActivity).setBackgroundResource(R.drawable.background);
+//                    }
+//                });
+
+            }
+        });
+
+        mainActivityViewModel.getShowProgressBar().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean aBoolean) {
+                if (aBoolean) {
+                    progressBar.setVisibility(View.VISIBLE);
+                } else {
+                    progressBar.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+        mainActivityViewModel.getShow_networkError().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean aBoolean) {
+                if (aBoolean) {
+                    layout_nonetwork.setVisibility(View.VISIBLE);
+                } else {
+                    layout_nonetwork.setVisibility(View.GONE);
+                }
+            }
+        });
+
+
 
         mainActivityViewModel.getWeatherUpdateMutableLiveData().observe(this, new Observer<WeatherUpdate>() {
             @RequiresApi(api = Build.VERSION_CODES.O)
@@ -120,8 +188,9 @@ public class MainActivity extends AppCompatActivity {
 //                weathertypeimg.se
                 iconName=weatherUpdate.getWeather().get(0).getIcon();
                 Picasso.with(MainActivity.this).load(IMG_URL +iconName +".png").into(weathertypeimg);
-
-
+                findViewById(R.id.mainActivity).setBackgroundResource(R.drawable.background);
+                layout_nonetwork.setVisibility(View.GONE);
+                findViewById(R.id.bottom_sheet).setVisibility(View.VISIBLE);
 
 
 
@@ -150,6 +219,17 @@ public class MainActivity extends AppCompatActivity {
                 return super.onTouchEvent(event);
         }
     }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+
+
+
 
 
 
