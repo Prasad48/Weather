@@ -8,17 +8,20 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.view.GestureDetectorCompat;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.prasad.weather.models.Forecast;
 import com.prasad.weather.models.WeatherUpdate;
 import com.prasad.weather.viewmodels.MainActivityViewModel;
+import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
@@ -29,36 +32,42 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
 
-public class MainActivity extends AppCompatActivity implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener{
+public class MainActivity extends AppCompatActivity {
 
-    TextView location,timestamp,temperature,weathertype,mintemp,maxtemp,sunrise,sunset,wind;
+    TextView location,timestampdt,temperature,weathertype,mintemp,maxtemp,sunrise,sunset,wind,pressure,humidity;
+    ImageView weathertypeimg;
+    public static final String IMG_URL = "https://openweathermap.org/img/w/";
+    public String iconName;
+
     Double temperaturecelsius,mintemperature,maxtemperature;
     public MainActivityViewModel mainActivityViewModel;
     private String TAG = "Main Activity";
     private BottomSheetBehavior sheetBehavior;
     private LinearLayout bottom_sheet;
-    private GestureDetectorCompat gestureDetectorCompat;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         location=findViewById(R.id.location);
-        timestamp=findViewById(R.id.timestamp);
+        timestampdt=findViewById(R.id.timestamp);
+        weathertypeimg = findViewById(R.id.weathertypeimg);
         temperature=findViewById(R.id.temperature);
         weathertype=findViewById(R.id.weatherType);
         mintemp=findViewById(R.id.mintemp);
         maxtemp=findViewById(R.id.maxtemp);
         sunrise=findViewById(R.id.sunrise);
         sunset=findViewById(R.id.sunset);
+        wind=findViewById(R.id.wind);
         bottom_sheet = findViewById(R.id.bottom_sheet);
-//        sheetBehavior = BottomSheetBehavior.from(bottom_sheet);
+        sheetBehavior = BottomSheetBehavior.from(bottom_sheet);
         mainActivityViewModel  = ViewModelProviders.of(this).get(MainActivityViewModel.class);
-        gestureDetectorCompat = new GestureDetectorCompat(this,this);
 
         mainActivityViewModel.getWeatherUpdateMutableLiveData().observe(this, new Observer<WeatherUpdate>() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onChanged(@Nullable WeatherUpdate weatherUpdate) {
+                pressure=findViewById(R.id.pressure);
+                humidity=findViewById(R.id.humidity);
                 temperaturecelsius=weatherUpdate.getMain().getTemp().doubleValue();
                 temperaturecelsius = (temperaturecelsius - 273.15);
                 temperature.setText(temperaturecelsius.toString()+" \u2103");
@@ -67,76 +76,51 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                 mintemp.setText(mintemperature.toString()+" \u2103");
                 maxtemperature=weatherUpdate.getMain().getTempMax().doubleValue();
                 maxtemperature= (maxtemperature - 273.15);
-                maxtemp.setText(maxtemperature.toString());
+                maxtemp.setText(maxtemperature.toString()+" \u2103");
                 weathertype.setText(weatherUpdate.getWeather().get(0).getDescription());
 
 
-
-
-                long dat=(long) weatherUpdate.getId().intValue();
-                String dateAsText = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                        .format(new Date(weatherUpdate.getId().intValue() * 1000L));
-
-                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-                Date datetime = new Date(weatherUpdate.getId().intValue());
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                long unixtime=weatherUpdate.getDt().longValue();
+                long timestamp = unixtime * 1000; // msec
+                java.util.Date d = new java.util.Date(timestamp);
                 sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
                 ZoneOffset offset = ZoneOffset.ofTotalSeconds(weatherUpdate.getTimezone());
-                System.out.println("Offset is " + offset);
                 String Gmt="GMT"+offset;
                 sdf.setTimeZone(TimeZone.getTimeZone(Gmt));
-                timestamp.setText("Updated at: "+sdf.format(datetime));
-
-
-//                String dateAsText = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-//                        .format(new Date(weatherUpdate.getId().intValue() * 1000L));
-//                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-//                LocalDateTime localNZ = LocalDateTime.parse(dateAsText,formatter);
-//
-//
-//                ZonedDateTime zonedNZ = ZonedDateTime.of(localNZ, ZoneId.of(Gmt));
-//                LocalDateTime localUTC = zonedNZ.withZoneSameInstant(ZoneId.of("GMT")).toLocalDateTime();
-////                System.out.println("UTC Local Time: "+localUTC.format(formatter));
-//                timestamp.setText("Updated at: "+localUTC.format(formatter));
+                System.out.println(("Updated at: "+sdf.format(d)));
+                timestampdt.setText("Updated at: "+sdf.format(d));
 
 
 
-//                weathertype.setText(weatherUpdate.getMain().);
-
-                long sunrisev=(long) weatherUpdate.getId().intValue();
-                String surisedt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                        .format(new Date(weatherUpdate.getId().intValue() * 1000L));
-
-                SimpleDateFormat sunriseformat = new SimpleDateFormat("HH:mm:ss");
-                Date sunrisedate = new Date();
+                SimpleDateFormat sunrisedtformat = new SimpleDateFormat("HH:mm");
+                long sunrisev=weatherUpdate.getSys().getSunrise().longValue();
+                long sunrisetimestamp = sunrisev * 1000; // msec
+                java.util.Date sunrisedt = new java.util.Date(sunrisetimestamp);
                 sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-                ZoneOffset sunriseoffset = ZoneOffset.ofTotalSeconds(weatherUpdate.getTimezone());
-                String sunriseGmt="GMT"+sunriseoffset;
-                sdf.setTimeZone(TimeZone.getTimeZone(sunriseGmt));
-                sunrise.setText("Updated at: "+sdf.format(sunrisedate));
+                sdf.setTimeZone(TimeZone.getTimeZone(Gmt));
+//                System.out.println(("Updated at: "+sunrisedtformat.format(sunrisedt)));
+                sunrise.setText(""+sunrisedtformat.format(sunrisedt));
 
-
-                long sunsetv=(long) weatherUpdate.getId().intValue();
-                String sunsetdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                        .format(new Date(weatherUpdate.getId().intValue() * 1000L));
-
-                SimpleDateFormat sunsetformat = new SimpleDateFormat("HH:mm:ss");
-                Date sunsetdate = new Date();
+                long sunsetv=weatherUpdate.getSys().getSunset().longValue();
+                long sunsettimestamp = sunsetv * 1000; // msec
+                java.util.Date sunsetdt = new java.util.Date(sunsettimestamp);
                 sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-                ZoneOffset sunsetoffset = ZoneOffset.ofTotalSeconds(weatherUpdate.getTimezone());
-                String sunsetgmt="GMT"+sunsetoffset;
-                sdf.setTimeZone(TimeZone.getTimeZone(sunsetgmt));
-                sunrise.setText("Updated at: "+sunsetformat.format(sunsetdate));
+                sdf.setTimeZone(TimeZone.getTimeZone(Gmt));
+                System.out.println(("Updated at: "+sunrisedtformat.format(sunsetdt)));
+                sunset.setText(""+sunrisedtformat.format(sunsetdt));
 
-//                windv=weatherUpdate.getWind().getDeg().doubleValue();
-//                windv= (windv - 273.15);
-//                wind.setText(""+windv);
-
-//                        +" ,speed: "+weatherUpdate.getWind().getSpeed().toString());
-
-
-
+                Double windv=weatherUpdate.getWind().getSpeed().doubleValue();
+                wind.setText(windv.toString());
 
                 location.setText(weatherUpdate.getName().concat(",").concat(weatherUpdate.getSys().getCountry()));
+
+                humidity.setText(""+weatherUpdate.getMain().getHumidity());
+                pressure.setText(""+weatherUpdate.getMain().getPressure());
+//                weathertypeimg.se
+                iconName=weatherUpdate.getWeather().get(0).getIcon();
+                Picasso.with(MainActivity.this).load(IMG_URL +iconName +".png").into(weathertypeimg);
+
 
 
 
@@ -151,53 +135,20 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                 Log.d(TAG, "onChanged: ");
             }
         });
-        gestureDetectorCompat.setOnDoubleTapListener(this);
     }
 
-    @Override
-    public boolean onSingleTapConfirmed(MotionEvent e) {
-        return false;
-    }
 
     @Override
-    public boolean onDoubleTap(MotionEvent e) {
-        return false;
-    }
+    public boolean onTouchEvent(MotionEvent event) {
+        int action = MotionEventCompat.getActionMasked(event);
 
-    @Override
-    public boolean onDoubleTapEvent(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public boolean onDown(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public void onShowPress(MotionEvent e) {
-
-    }
-
-    @Override
-    public boolean onSingleTapUp(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        return false;
-    }
-
-    @Override
-    public void onLongPress(MotionEvent e) {
-
-    }
-
-    @Override
-    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        Log.d("bub", "onFling: " + e1.toString() + e2.toString());
-        return false;
+        switch(action) {
+            case (MotionEvent.ACTION_UP) :
+                sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                return true;
+            default :
+                return super.onTouchEvent(event);
+        }
     }
 
 
