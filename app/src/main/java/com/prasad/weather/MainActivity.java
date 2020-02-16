@@ -8,6 +8,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Path;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -24,12 +25,14 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -38,6 +41,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 import com.prasad.weather.adapters.ForecastRecycler;
 import com.prasad.weather.models.Forecast;
@@ -60,12 +64,12 @@ import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity implements LocationListener{
 
-    TextView location,timestampdt,temperature,weathertype,mintemp,maxtemp,sunrise,sunset,wind,pressure,humidity;
+    TextView feellike,location,timestampdt,temperature,weathertype,mintemp,maxtemp,sunrise,sunset,wind,pressure,humidity;
     LocationManager locationManager;
     RecyclerView recyclerView;
     ForecastRecycler forecastRecycler;
     private String city;
-    ImageView weathertypeimg;
+    ImageView weathertypeimg,sunriseimage,sunsetimage,windimage,humididtyimage,pressureimage;
     public static final String IMG_URL = "https://openweathermap.org/img/w/";
     public String iconName;
     Button retry;
@@ -78,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     private RelativeLayout layout_nonetwork;
     public MutableLiveData<Boolean> showProgressBar = new MutableLiveData<>();
     public MutableLiveData<Boolean> show_networkError = new MutableLiveData<>();
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,8 +100,24 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         bottom_sheet = findViewById(R.id.bottom_sheet);
         sheetBehavior = BottomSheetBehavior.from(bottom_sheet);
         layout_nonetwork = findViewById(R.id.no_network);
+        sunriseimage=findViewById(R.id.sunriseimg);
+        sunsetimage=findViewById(R.id.sunsetimg);
+        windimage=findViewById(R.id.windimg);
+        humididtyimage=findViewById(R.id.humidityimg);
+        pressureimage=findViewById(R.id.pressureimg);
+        feellike=findViewById(R.id.feelslike);
         mainActivityViewModel  = ViewModelProviders.of(MainActivity.this).get(MainActivityViewModel.class);
 
+        ActionBar actionBar=getSupportActionBar();
+//        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        LayoutInflater inflate= (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View v=inflate.inflate(R.layout.custom_actionbar_image,null);
+
+        actionBar.setCustomView(v);
+//        Toolbar toolbar= (Toolbar)v.getParent();
+//        toolbar.setContentInsetsAbsolute(0,0);
+//        findViewById(R.id.content_main).setVisibility(View.INVISIBLE);
         getLocation();
 
 
@@ -110,7 +131,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         else {
             layout_nonetwork.setVisibility(View.GONE);
             findViewById(R.id.bottom_sheet).setVisibility(View.VISIBLE);
-            findViewById(R.id.mainActivity).setBackgroundResource(R.drawable.background);
         }
         progressBar = findViewById(R.id.progress_bar);
         retry=findViewById(R.id.retry);
@@ -209,11 +229,31 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
                             Picasso.with(MainActivity.this).load(IMG_URL +iconName +".png").into(weathertypeimg);
                             findViewById(R.id.mainActivity).setBackgroundResource(R.drawable.background);
                             layout_nonetwork.setVisibility(View.GONE);
-                            findViewById(R.id.content_main).setVisibility(View.VISIBLE);
                             findViewById(R.id.bottom_sheet).setVisibility(View.VISIBLE);
                             Log.d(TAG, "onChanged: ");
+                            findViewById(R.id.progress_bar).setVisibility(View.INVISIBLE);
+                            feellike.setText(Math.round(weatherUpdate.getMain().getFeelsLike().doubleValue()- 273.15)+" \u2103");
+                            sunriseimage.setBackgroundResource(R.drawable.sun);
+                            sunsetimage.setBackgroundResource(R.drawable.clear);
+//                            windimage.setBackgroundResource(R.drawable.clouds);
+
                         }
                     });
+
+
+                    mainActivityViewModel.getForecastMutableLiveData().observe(MainActivity.this, new Observer<Forecast>() {
+                        @Override
+                        public void onChanged(@Nullable Forecast forecast) {
+                            Log.d(TAG, "onChanged: forecast");
+                            recyclerView=findViewById(R.id.forecastrecyclerview);
+                            recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                            forecastRecycler = new ForecastRecycler(forecast,MainActivity.this);
+
+
+                            recyclerView.setAdapter(forecastRecycler);
+                        }
+                    });
+
                 }
                 else {
                     Log.d(TAG, "onChanged: city null ");
@@ -222,18 +262,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         },5000);
 
 
-        mainActivityViewModel.getForecastMutableLiveData().observe(this, new Observer<Forecast>() {
-            @Override
-            public void onChanged(@Nullable Forecast forecast) {
-                Log.d(TAG, "onChanged: forecast");
-                recyclerView=findViewById(R.id.forecastrecyclerview);
-                recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-                forecastRecycler = new ForecastRecycler(forecast,MainActivity.this);
 
-
-                recyclerView.setAdapter(forecastRecycler);
-            }
-        });
     }
 
 

@@ -74,23 +74,29 @@ public class MainActivityViewModel extends ViewModel {
         if(forecastMutableLiveData == null){
             forecastMutableLiveData = new MutableLiveData<>();
             Api api = RetrofitGenerator.getApi();
-            apicall_forecast = api.getForecast("visakhapatnam","4b5bb0a2f34b060e2c5704f8e52d68bb");
-            apicall_forecast.enqueue(new Callback<Forecast>() {
-                @Override
-                public void onResponse(Call<Forecast> call, Response<Forecast> response) {
-                    Log.d("success", "onResponse: "+response.raw().toString());
-                    forecastMutableLiveData.setValue(response.body());
-                }
+            try{
+                object=object.getInstance();
+                apicall_forecast = api.getForecast(object.city,"4b5bb0a2f34b060e2c5704f8e52d68bb");
+                apicall_forecast.enqueue(new Callback<Forecast>() {
+                    @Override
+                    public void onResponse(Call<Forecast> call, Response<Forecast> response) {
+                        Log.d("success", "onResponse: "+response.raw().toString());
+                        forecastMutableLiveData.setValue(response.body());
+                    }
 
-                @Override
-                public void onFailure(Call<Forecast> call, Throwable t) {
-                    String error_message= t.getMessage();
-                    Log.d("Error loading data", error_message);
-                    show_networkError.setValue(true);
-                    showProgressBar.setValue(false);
-                }
-            });
+                    @Override
+                    public void onFailure(Call<Forecast> call, Throwable t) {
+                        String error_message= t.getMessage();
+                        Log.d("Error loading data", error_message);
+                        show_networkError.setValue(true);
+                        showProgressBar.setValue(false);
+                    }
+                });
 
+            }
+            catch (Exception e){
+                Log.e("forecast","exception"+e);
+            }
         }
         return forecastMutableLiveData;
     }

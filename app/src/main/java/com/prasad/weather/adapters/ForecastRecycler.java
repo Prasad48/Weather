@@ -57,10 +57,10 @@ public class ForecastRecycler extends RecyclerView.Adapter<ForecastRecycler.Recy
         recyclerViewHolder.temperature.setText(Math.round(temperaturecelsius)+" \u2103");
         mintemperature=forecast.getList().get(i).getMain().getTempMin().doubleValue();
         mintemperature =  (mintemperature - 273.15);
-        recyclerViewHolder.mintemp.setText(Math.round(mintemperature)+" \u2103");
+        recyclerViewHolder.mintemp.setText("Mintemp: "+Math.round(mintemperature)+" \u2103");
         maxtemperature=forecast.getList().get(i).getMain().getTempMax().doubleValue();
         maxtemperature= (maxtemperature - 273.15);
-        recyclerViewHolder.maxtemp.setText(Math.round(maxtemperature)+" \u2103");
+        recyclerViewHolder.maxtemp.setText("Maxtemp :"+Math.round(maxtemperature)+" \u2103");
 
         recyclerViewHolder.timestampdt.setText(forecast.getList().get(i).getDtTxt());
         String iconName=forecast.getList().get(i).getWeather().get(0).getIcon();
@@ -86,12 +86,13 @@ public class ForecastRecycler extends RecyclerView.Adapter<ForecastRecycler.Recy
 //
 //        recyclerViewHolder.sunrise.setText(""+sunrisedtformat.format(sunrisedt));
 //        recyclerViewHolder.sunset.setText(""+sunrisedtformat.format(sunsetdt));
-        int h=forecast.getList().get(0).getMain().getHumidity().intValue();
-        int p=forecast.getList().get(0).getMain().getPressure().intValue();
+        int humidity=forecast.getList().get(0).getMain().getHumidity().intValue();
+        int pressure=forecast.getList().get(0).getMain().getPressure().intValue();
         Double w=forecast.getList().get(0).getWind().getSpeed().doubleValue();
-        recyclerViewHolder.humidity.setText(""+h);
-        recyclerViewHolder.pressure.setText(""+p);
+        recyclerViewHolder.humidity.setText(""+humidity);
+        recyclerViewHolder.pressure.setText(""+pressure);
         recyclerViewHolder.wind.setText(w.toString());
+        recyclerViewHolder.feelike.setText(Math.round(forecast.getList().get(i).getMain().getFeelsLike().doubleValue()-273.15)+" \u2103");
     }
 
     @Override
@@ -102,7 +103,7 @@ public class ForecastRecycler extends RecyclerView.Adapter<ForecastRecycler.Recy
 
     public class RecyclerViewHolder extends RecyclerView.ViewHolder{
 
-        TextView location,timestampdt,temperature,weathertype,mintemp,maxtemp,sunrise,sunset,wind,pressure,humidity;
+        TextView feelike,location,timestampdt,temperature,weathertype,mintemp,maxtemp,sunrise,sunset,wind,pressure,humidity;
         ImageView weathertypeimg;
 
         public RecyclerViewHolder(@NonNull View itemView) {
@@ -120,6 +121,7 @@ public class ForecastRecycler extends RecyclerView.Adapter<ForecastRecycler.Recy
             humidity=itemView.findViewById(R.id.humidity);
             pressure=itemView.findViewById(R.id.pressure);
             wind=itemView.findViewById(R.id.wind);
+            feelike=itemView.findViewById(R.id.feelslike);
         }
 
     }
