@@ -5,6 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
+    android:id="@+id/content_main"
+    android:background="@drawable/background"
     android:padding="25dp">
 
     <TextView
@@ -34,8 +36,7 @@
         android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="60dp"
-        android:text="20"/>
+        android:textSize="60dp"/>
 
     <ImageView
         android:layout_width="wrap_content"
@@ -93,14 +94,12 @@
                 android:orientation="vertical"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:padding="8dp"
-                android:background="#3CF1EBF1">
+                android:padding="8dp">
 
                 <ImageView
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:src="@drawable/sun"
-                    android:tint="#FFFFFF"/>
+                    android:src="@drawable/sun"/>
                 <Space
                     android:layout_width="wrap_content"
                     android:layout_height="5dp"/>
@@ -132,14 +131,12 @@
                 android:orientation="vertical"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:padding="8dp"
-                android:background="#3CF1EBF1">
+                android:padding="8dp">
 
                 <ImageView
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:src="@drawable/clear"
-                    android:tint="#FFFFFF"/>
+                    android:src="@drawable/clear"/>
 
                 <Space android:layout_width="wrap_content" android:layout_height="5dp"/>
 
@@ -166,14 +163,12 @@
                 android:orientation="vertical"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:padding="8dp"
-                android:background="#3CF1EBF1">
+                android:padding="8dp">
 
                 <ImageView
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:src="@drawable/clouds"
-                    android:tint="#FFFFFF"/>
+                    android:src="@drawable/clouds"/>
 
                 <Space
                     android:layout_width="wrap_content"
@@ -189,8 +184,7 @@
                     android:id="@+id/wind"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14dp"
-                    android:text="06:40 AM"/>
+                    android:textSize="14dp"/>
 
             </LinearLayout>
 
@@ -212,14 +206,12 @@
                 android:orientation="vertical"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:padding="8dp"
-                android:background="#3CF1EBF1">
+                android:padding="8dp">
 
                 <ImageView
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:src="@drawable/sun"
-                    android:tint="#FFFFFF"/>
+                    android:src="@drawable/sun"/>
 
                 <Space
                     android:layout_width="wrap_content"
@@ -252,14 +244,12 @@
                 android:orientation="vertical"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:padding="8dp"
-                android:background="#3CF1EBF1">
+                android:padding="8dp">
 
                 <ImageView
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:src="@drawable/sun"
-                    android:tint="#FFFFFF"/>
+                    android:src="@drawable/sun"/>
 
                 <Space
                     android:layout_width="wrap_content"
@@ -277,8 +267,7 @@
                     android:id="@+id/humidity"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14dp"
-                    android:text="06:40 AM"/>
+                    android:textSize="14dp"/>
 
             </LinearLayout>
 
@@ -292,14 +281,12 @@
                 android:orientation="vertical"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:padding="8dp"
-                android:background="#3CF1EBF1">
+                android:padding="8dp">
 
                 <ImageView
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:src="@drawable/sun"
-                    android:tint="#FFFFFF"/>
+                    android:src="@drawable/sun"/>
 
                 <Space
                     android:layout_width="wrap_content"
