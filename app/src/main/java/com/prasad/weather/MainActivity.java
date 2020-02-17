@@ -7,7 +7,9 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.Path;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
@@ -35,6 +37,7 @@ import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -115,7 +118,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         pressurehead=findViewById(R.id.pressureheading);
         feelslikehead=findViewById(R.id.feelslikeheading);
         retry=findViewById(R.id.retry);
+
         getLocation();
+
         progressBar = findViewById(R.id.progress_bar);
         if(!isNetworkAvailable()){
             layout_nonetwork.setVisibility(View.VISIBLE);
@@ -226,13 +231,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
                     humidity=findViewById(R.id.humidity);
                     temperaturecelsius=weatherUpdate.getMain().getTemp().doubleValue();
                     temperaturecelsius = (temperaturecelsius - 273.15);
-                    temperature.setText(temperaturecelsius.toString()+" \u2103");
+                    temperature.setText(Math.round(temperaturecelsius)+" \u2103");
                     mintemperature=weatherUpdate.getMain().getTempMin().doubleValue();
                     mintemperature = (mintemperature - 273.15);
-                    mintemp.setText("Minimum: "+mintemperature.toString()+" \u2103");
+                    mintemp.setText("Minimum: "+Math.round(mintemperature)+" \u2103");
                     maxtemperature=weatherUpdate.getMain().getTempMax().doubleValue();
                     maxtemperature= (maxtemperature - 273.15);
-                    maxtemp.setText("Maximum: "+maxtemperature.toString()+" \u2103");
+                    maxtemp.setText("Maximum: "+Math.round(maxtemperature)+" \u2103");
                     weathertype.setText(weatherUpdate.getWeather().get(0).getDescription());
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     long unixtime=weatherUpdate.getDt().longValue();
