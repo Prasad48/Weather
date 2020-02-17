@@ -70,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     LocationManager locationManager;
     RecyclerView recyclerView;
     ForecastRecycler forecastRecycler;
-    Forecast forecastobject;
     private String city;
     ImageView weathertypeimg,sunriseimage,sunsetimage,windimage,humididtyimage,pressureimage;
     public static final String IMG_URL = "https://openweathermap.org/img/w/";
@@ -177,10 +176,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
                 if(isNetworkAvailable()){
                     progressBar.setVisibility(View.VISIBLE);
                     if(city!=null){
-//                        mainActivityViewModel.forecastretry();
-                        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-                        forecastRecycler = new ForecastRecycler(forecastobject,MainActivity.this);
-                        recyclerView.setAdapter(forecastRecycler);
+                        mainActivityViewModel.forecastretry();
                         progressBar.setVisibility(View.INVISIBLE);
                         sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                         return true;
@@ -290,7 +286,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             mainActivityViewModel.getForecastMutableLiveData().observe(MainActivity.this, new Observer<Forecast>() {
                 @Override
                 public void onChanged(@Nullable Forecast forecast) {
-                    forecastobject=forecast;
                     Log.d(TAG, "onChanged: forecast");
                     recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
                     forecastRecycler = new ForecastRecycler(forecast,MainActivity.this);
