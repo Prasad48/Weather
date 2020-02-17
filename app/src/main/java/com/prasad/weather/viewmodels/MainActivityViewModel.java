@@ -51,8 +51,7 @@ public class MainActivityViewModel extends ViewModel {
                 });
             }
             catch (Exception e){
-                System.out.println("ecxep"+e);
-                System.out.println("ecxep"+e);
+                Log.e("Weatherupdate","exception"+e);
             }
 
         }

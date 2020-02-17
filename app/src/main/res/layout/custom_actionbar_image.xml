@@ -16,19 +16,33 @@
 <!--        android:src="@drawable/banner" />-->
 
 
+<!--    <android.support.v7.widget.Toolbar-->
+<!--        android:id="@+id/toolbar"-->
+
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:minHeight="100dp"-->
+<!--        android:background="@drawable/banner"-->
+<!--        android:contentInsetStart="0dp"-->
+<!--        android:contentInsetLeft="0dp"-->
+<!--        app:contentInsetLeft="0dp"-->
+<!--        app:contentInsetStart="0dp"-->
+<!--        android:scaleX="0"-->
+<!--        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"-->
+<!--    app:popupTheme="@style/ThemeOverlay.AppCompat.Light">-->
+<!--    </android.support.v7.widget.Toolbar>-->
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
-
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:minHeight="100dp"
         android:background="@drawable/banner"
-        android:contentInsetStart="0dp"
-        android:contentInsetLeft="0dp"
-        app:contentInsetLeft="0dp"
-        app:contentInsetStart="0dp"
-        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-    app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
-    </android.support.v7.widget.Toolbar>
+        android:contentInsetStart="30dp"
+    android:contentInsetLeft="30dp"
+    app:contentInsetLeft="30dp"
+    app:contentInsetStart="30dp"
+    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
 
 </RelativeLayout>

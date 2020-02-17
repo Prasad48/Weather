@@ -63,11 +63,11 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity implements LocationListener{
-
-    TextView feellike,location,timestampdt,temperature,weathertype,mintemp,maxtemp,sunrise,sunset,wind,pressure,humidity;
+    TextView feellike,location,timestampdt,temperature,weathertype,mintemp,maxtemp,sunrise,sunset,wind,pressure,humidity,sunrisehead,sunsethead,winhead,pressurehead,humidityhead,feelslikehead;
     LocationManager locationManager;
     RecyclerView recyclerView;
     ForecastRecycler forecastRecycler;
+    Forecast forecastobject;
     private String city;
     ImageView weathertypeimg,sunriseimage,sunsetimage,windimage,humididtyimage,pressureimage;
     public static final String IMG_URL = "https://openweathermap.org/img/w/";
@@ -106,53 +106,39 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         humididtyimage=findViewById(R.id.humidityimg);
         pressureimage=findViewById(R.id.pressureimg);
         feellike=findViewById(R.id.feelslike);
+        recyclerView=findViewById(R.id.forecastrecyclerview);
         mainActivityViewModel  = ViewModelProviders.of(MainActivity.this).get(MainActivityViewModel.class);
-
-        ActionBar actionBar=getSupportActionBar();
-//        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        LayoutInflater inflate= (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v=inflate.inflate(R.layout.custom_actionbar_image,null);
-
-        actionBar.setCustomView(v);
-//        Toolbar toolbar= (Toolbar)v.getParent();
-//        toolbar.setContentInsetsAbsolute(0,0);
-//        findViewById(R.id.content_main).setVisibility(View.INVISIBLE);
+        sunrisehead=findViewById(R.id.sunriseheading);
+        sunsethead=findViewById(R.id.sunsetheading);
+        winhead=findViewById(R.id.windheading);
+        humidityhead=findViewById(R.id.humidityheading);
+        pressurehead=findViewById(R.id.pressureheading);
+        feelslikehead=findViewById(R.id.feelslikeheading);
+        retry=findViewById(R.id.retry);
         getLocation();
-
-
+        progressBar = findViewById(R.id.progress_bar);
         if(!isNetworkAvailable()){
             layout_nonetwork.setVisibility(View.VISIBLE);
             findViewById(R.id.bottom_sheet).setVisibility(View.INVISIBLE);
             findViewById(R.id.content_main).setVisibility(View.INVISIBLE);
-
-//            findViewById(R.id.mainActivity).setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.INVISIBLE);
         }
         else {
             layout_nonetwork.setVisibility(View.GONE);
             findViewById(R.id.bottom_sheet).setVisibility(View.VISIBLE);
         }
-        progressBar = findViewById(R.id.progress_bar);
-        retry=findViewById(R.id.retry);
-
         retry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                mainActivityViewModel.retry();
-//                System.out.println("retry clicked");
-//                mainActivityViewModel.getWeatherUpdateMutableLiveData().observe(MainActivity.this, new Observer<WeatherUpdate>() {
-//                    @Override
-//                    public void onChanged(@Nullable WeatherUpdate weatherUpdate) {
-//                        layout_nonetwork.setVisibility(View.GONE);
-//                        findViewById(R.id.mainActivity).setVisibility(View.VISIBLE);
-//                        findViewById(R.id.mainActivity).setBackgroundResource(R.drawable.background);
-//                    }
-//                });
+                if(isNetworkAvailable()){
+                    if(city!=null){
+                        progressBar.setVisibility(View.VISIBLE);
+                        mainActivityViewModel.retry();
+                    }
+                }
 
             }
         });
-
         mainActivityViewModel.getShowProgressBar().observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean aBoolean) {
@@ -168,114 +154,33 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             public void onChanged(@Nullable Boolean aBoolean) {
                 if (aBoolean) {
                     layout_nonetwork.setVisibility(View.VISIBLE);
+                    findViewById(R.id.bottom_sheet).setVisibility(View.INVISIBLE);
                 } else {
                     layout_nonetwork.setVisibility(View.GONE);
+                    findViewById(R.id.bottom_sheet).setVisibility(View.VISIBLE);
+                    findViewById(R.id.content_main).setVisibility(View.VISIBLE);
                 }
             }
         });
-
-
-        final Handler handler=new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if(city!=null){
-                    System.out.println("fgfd");
-                    System.out.println("fgfd");
-                    mainActivityViewModel.getWeatherUpdateMutableLiveData().observe(MainActivity.this, new Observer<WeatherUpdate>() {
-                        @RequiresApi(api = Build.VERSION_CODES.O)
-                        @Override
-                        public void onChanged(@Nullable WeatherUpdate weatherUpdate) {
-                            pressure=findViewById(R.id.pressure);
-                            humidity=findViewById(R.id.humidity);
-                            temperaturecelsius=weatherUpdate.getMain().getTemp().doubleValue();
-                            temperaturecelsius = (temperaturecelsius - 273.15);
-                            temperature.setText(temperaturecelsius.toString()+" \u2103");
-                            mintemperature=weatherUpdate.getMain().getTempMin().doubleValue();
-                            mintemperature = (mintemperature - 273.15);
-                            mintemp.setText(mintemperature.toString()+" \u2103");
-                            maxtemperature=weatherUpdate.getMain().getTempMax().doubleValue();
-                            maxtemperature= (maxtemperature - 273.15);
-                            maxtemp.setText(maxtemperature.toString()+" \u2103");
-                            weathertype.setText(weatherUpdate.getWeather().get(0).getDescription());
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            long unixtime=weatherUpdate.getDt().longValue();
-                            long timestamp = unixtime * 1000; // msec
-                            java.util.Date d = new java.util.Date(timestamp);
-                            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-                            ZoneOffset offset = ZoneOffset.ofTotalSeconds(weatherUpdate.getTimezone());
-                            String Gmt="GMT"+offset;
-                            sdf.setTimeZone(TimeZone.getTimeZone(Gmt));
-                            timestampdt.setText("Updated at: "+sdf.format(d));
-                            SimpleDateFormat sunrisedtformat = new SimpleDateFormat("HH:mm");
-                            long sunrisev=weatherUpdate.getSys().getSunrise().longValue();
-                            long sunrisetimestamp = sunrisev * 1000; // msec
-                            java.util.Date sunrisedt = new java.util.Date(sunrisetimestamp);
-                            sunrisedtformat.setTimeZone(TimeZone.getTimeZone("GMT"));
-                            sunrisedtformat.setTimeZone(TimeZone.getTimeZone(Gmt));
-                            sunrise.setText(""+sunrisedtformat.format(sunrisedt));
-                            long sunsetv=weatherUpdate.getSys().getSunset().longValue();
-                            long sunsettimestamp = sunsetv * 1000; // msec
-                            java.util.Date sunsetdt = new java.util.Date(sunsettimestamp);
-                            sunrisedtformat.setTimeZone(TimeZone.getTimeZone("GMT"));
-                            sunrisedtformat.setTimeZone(TimeZone.getTimeZone(Gmt));
-                            sunset.setText(""+sunrisedtformat.format(sunsetdt));
-                            Double windv=weatherUpdate.getWind().getSpeed().doubleValue();
-                            wind.setText(windv.toString());
-                            location.setText(weatherUpdate.getName().concat(",").concat(weatherUpdate.getSys().getCountry()));
-                            humidity.setText(""+weatherUpdate.getMain().getHumidity());
-                            pressure.setText(""+weatherUpdate.getMain().getPressure());
-                            iconName=weatherUpdate.getWeather().get(0).getIcon();
-                            Picasso.with(MainActivity.this).load(IMG_URL +iconName +".png").into(weathertypeimg);
-                            findViewById(R.id.mainActivity).setBackgroundResource(R.drawable.background);
-                            layout_nonetwork.setVisibility(View.GONE);
-                            findViewById(R.id.bottom_sheet).setVisibility(View.VISIBLE);
-                            Log.d(TAG, "onChanged: ");
-                            findViewById(R.id.progress_bar).setVisibility(View.INVISIBLE);
-                            feellike.setText(Math.round(weatherUpdate.getMain().getFeelsLike().doubleValue()- 273.15)+" \u2103");
-                            sunriseimage.setBackgroundResource(R.drawable.sun);
-                            sunsetimage.setBackgroundResource(R.drawable.clear);
-//                            windimage.setBackgroundResource(R.drawable.clouds);
-
-                        }
-                    });
-
-
-                    mainActivityViewModel.getForecastMutableLiveData().observe(MainActivity.this, new Observer<Forecast>() {
-                        @Override
-                        public void onChanged(@Nullable Forecast forecast) {
-                            Log.d(TAG, "onChanged: forecast");
-                            recyclerView=findViewById(R.id.forecastrecyclerview);
-                            recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-                            forecastRecycler = new ForecastRecycler(forecast,MainActivity.this);
-
-
-                            recyclerView.setAdapter(forecastRecycler);
-                        }
-                    });
-
-                }
-                else {
-                    Log.d(TAG, "onChanged: city null ");
-                }
-            }
-        },5000);
-
-
-
     }
-
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-//        int action = MotionEventCompat.getActionMasked(event);
          int action = event.getActionMasked();
-
         switch(action) {
             case (MotionEvent.ACTION_UP) :
-                mainActivityViewModel.forecastretry();
-                sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                return true;
+                if(isNetworkAvailable()){
+                    progressBar.setVisibility(View.VISIBLE);
+                    if(city!=null){
+//                        mainActivityViewModel.forecastretry();
+                        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                        forecastRecycler = new ForecastRecycler(forecastobject,MainActivity.this);
+                        recyclerView.setAdapter(forecastRecycler);
+                        progressBar.setVisibility(View.INVISIBLE);
+                        sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                        return true;
+                    }
+                }
             default :
                 return super.onTouchEvent(event);
         }
@@ -288,14 +193,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-
     void getLocation() {
         try {
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-
             locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, (LocationListener) this);
-        System.out.println("fesf");
         }
         catch(SecurityException e) {
             e.printStackTrace();
@@ -313,11 +215,84 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
             city = addresses.get(0).getLocality();
             String state = addresses.get(0).getAdminArea();
-            String country = addresses.get(0).getCountryName();
-            String postalCode = addresses.get(0).getPostalCode();
-            String knownName = addresses.get(0).getFeatureName();
-            Locationdetails coords=Locationdetails.getInstance();
-            coords.city=city;
+            Locationdetails locationdetails = Locationdetails.getInstance();
+            locationdetails.city = city;
+
+            mainActivityViewModel.getWeatherUpdateMutableLiveData().observe(MainActivity.this, new Observer<WeatherUpdate>() {
+                @RequiresApi(api = Build.VERSION_CODES.O)
+                @Override
+                public void onChanged(@Nullable WeatherUpdate weatherUpdate) {
+                    pressure=findViewById(R.id.pressure);
+                    humidity=findViewById(R.id.humidity);
+                    temperaturecelsius=weatherUpdate.getMain().getTemp().doubleValue();
+                    temperaturecelsius = (temperaturecelsius - 273.15);
+                    temperature.setText(temperaturecelsius.toString()+" \u2103");
+                    mintemperature=weatherUpdate.getMain().getTempMin().doubleValue();
+                    mintemperature = (mintemperature - 273.15);
+                    mintemp.setText("Minimum: "+mintemperature.toString()+" \u2103");
+                    maxtemperature=weatherUpdate.getMain().getTempMax().doubleValue();
+                    maxtemperature= (maxtemperature - 273.15);
+                    maxtemp.setText("Maximum: "+maxtemperature.toString()+" \u2103");
+                    weathertype.setText(weatherUpdate.getWeather().get(0).getDescription());
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    long unixtime=weatherUpdate.getDt().longValue();
+                    long timestamp = unixtime * 1000; // msec
+                    java.util.Date d = new java.util.Date(timestamp);
+                    sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+                    ZoneOffset offset = ZoneOffset.ofTotalSeconds(weatherUpdate.getTimezone());
+                    String Gmt="GMT"+offset;
+                    sdf.setTimeZone(TimeZone.getTimeZone(Gmt));
+                    timestampdt.setText("Updated at: "+sdf.format(d));
+                    SimpleDateFormat sunrisedtformat = new SimpleDateFormat("HH:mm");
+                    long sunrisev=weatherUpdate.getSys().getSunrise().longValue();
+                    long sunrisetimestamp = sunrisev * 1000; // msec
+                    java.util.Date sunrisedt = new java.util.Date(sunrisetimestamp);
+                    sunrisedtformat.setTimeZone(TimeZone.getTimeZone("GMT"));
+                    sunrisedtformat.setTimeZone(TimeZone.getTimeZone(Gmt));
+                    sunrise.setText(""+sunrisedtformat.format(sunrisedt));
+                    long sunsetv=weatherUpdate.getSys().getSunset().longValue();
+                    long sunsettimestamp = sunsetv * 1000; // msec
+                    java.util.Date sunsetdt = new java.util.Date(sunsettimestamp);
+                    sunrisedtformat.setTimeZone(TimeZone.getTimeZone("GMT"));
+                    sunrisedtformat.setTimeZone(TimeZone.getTimeZone(Gmt));
+                    sunset.setText(""+sunrisedtformat.format(sunsetdt));
+                    Double windv=weatherUpdate.getWind().getSpeed().doubleValue();
+                    wind.setText(windv.toString());
+                    location.setText(weatherUpdate.getName().concat(",").concat(weatherUpdate.getSys().getCountry()));
+                    humidity.setText(""+weatherUpdate.getMain().getHumidity());
+                    pressure.setText(""+weatherUpdate.getMain().getPressure());
+                    iconName=weatherUpdate.getWeather().get(0).getIcon();
+                    Picasso.with(MainActivity.this).load(IMG_URL +iconName +".png").into(weathertypeimg);
+                    layout_nonetwork.setVisibility(View.GONE);
+                    findViewById(R.id.bottom_sheet).setVisibility(View.VISIBLE);
+                    findViewById(R.id.content_main).setVisibility(View.VISIBLE);
+                    findViewById(R.id.mainActivity).setVisibility(View.VISIBLE);
+                    Log.d(TAG, "onChanged: ");
+                    findViewById(R.id.progress_bar).setVisibility(View.INVISIBLE);
+                    feellike.setText(Math.round(weatherUpdate.getMain().getFeelsLike().doubleValue()- 273.15)+" \u2103");
+                    sunriseimage.setBackgroundResource(R.drawable.sun);
+                    sunsetimage.setBackgroundResource(R.drawable.clear);
+                    progressBar.setVisibility(View.INVISIBLE);
+                    sunrisehead.setText("Sunrise");
+                    sunsethead.setText("Sunset");
+                    winhead.setText("Wind");
+                    humidityhead.setText("humidity");
+                    pressurehead.setText("Pressure");
+                    feelslikehead.setText("Feels like");
+                }
+            });
+
+            mainActivityViewModel.getForecastMutableLiveData().observe(MainActivity.this, new Observer<Forecast>() {
+                @Override
+                public void onChanged(@Nullable Forecast forecast) {
+                    forecastobject=forecast;
+                    Log.d(TAG, "onChanged: forecast");
+                    recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                    forecastRecycler = new ForecastRecycler(forecast,MainActivity.this);
+                    recyclerView.setAdapter(forecastRecycler);
+                    progressBar.setVisibility(View.INVISIBLE);
+                }
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -343,22 +318,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
 
         switch (requestCode) {
             case 1: {
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        System.out.println("entered");
+                        Log.d(TAG,"Permission granted");
                 } else {
-                    System.out.println("else");
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    Log.d(TAG,"Permission Denied");
                 }
                 return;
             }
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
-
-
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 }

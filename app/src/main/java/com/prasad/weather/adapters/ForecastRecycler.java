@@ -57,10 +57,10 @@ public class ForecastRecycler extends RecyclerView.Adapter<ForecastRecycler.Recy
         recyclerViewHolder.temperature.setText(Math.round(temperaturecelsius)+" \u2103");
         mintemperature=forecast.getList().get(i).getMain().getTempMin().doubleValue();
         mintemperature =  (mintemperature - 273.15);
-        recyclerViewHolder.mintemp.setText("Mintemp: "+Math.round(mintemperature)+" \u2103");
+        recyclerViewHolder.mintemp.setText("Minimum: "+Math.round(mintemperature)+" \u2103");
         maxtemperature=forecast.getList().get(i).getMain().getTempMax().doubleValue();
         maxtemperature= (maxtemperature - 273.15);
-        recyclerViewHolder.maxtemp.setText("Maxtemp :"+Math.round(maxtemperature)+" \u2103");
+        recyclerViewHolder.maxtemp.setText("Maximum :"+Math.round(maxtemperature)+" \u2103");
 
         recyclerViewHolder.timestampdt.setText(forecast.getList().get(i).getDtTxt());
         String iconName=forecast.getList().get(i).getWeather().get(0).getIcon();
